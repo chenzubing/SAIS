@@ -209,10 +209,10 @@ class VideoDataset(Dataset):
                                 final_df = pd.concat((final_df,group_df),axis=0)
                         return final_df
 
-                    def getSingleGroup(df,group_info,inference_set='test'): # â‰¤60
+                    def getSingleGroup(df,group_info,inference_set='test'): # â‰?0
                         group = group_info['group_name']
                         group_val_name = group_info['group_val']
-                        group_val = '>60' if group_val_name == 'ProstateLarge60ml' else 'â‰¤60'
+                        group_val = '>60' if group_val_name == 'ProstateLarge60ml' else 'â‰?0'
                         """ Load Meta Information """
                         meta_df = loadMetaInfo(inference_set)
                         meta_df.drop_duplicates(subset=['CaseID','TaskID'],keep='first',inplace=True)
@@ -232,9 +232,9 @@ class VideoDataset(Dataset):
                         if inference_set == 'Gronau_inference': # Gronau Path
                             meta_df = pd.read_csv(os.path.join(self.root_path,'SurgicalPaths','Meta','surgeon_and_patient_case_meta_gronau.csv'),index_col=0)
                             meta_df['CaseID'] = meta_df['CaseID'].apply(lambda case:int(case.split('GP-')[1]))
-                            meta_df['Prostate Volume Group'] = meta_df['Prostate volume'].apply(lambda vol:'â‰¤49' if vol <= 49 else '>49')
-                            meta_df['Patient Age Group'] = meta_df['Age'].apply(lambda age:'â‰¤66' if age <= 66 else '>66')
-                            meta_df['Patient BMI Group'] = meta_df['BMI'].apply(lambda bmi:'â‰¤28' if bmi <= 28 else '>28')
+                            meta_df['Prostate Volume Group'] = meta_df['Prostate volume'].apply(lambda vol:'â‰?9' if vol <= 49 else '>49')
+                            meta_df['Patient Age Group'] = meta_df['Age'].apply(lambda age:'â‰?6' if age <= 66 else '>66')
+                            meta_df['Patient BMI Group'] = meta_df['BMI'].apply(lambda bmi:'â‰?8' if bmi <= 28 else '>28')
                             meta_df['Preop Gleason'] = meta_df['Preop Gleason'].apply(lambda num:num if np.isnan(num) else str(int(num))) #convert to strings
                         else: # USC Path 
                             meta_df = pd.read_csv(os.path.join(self.root_path,'SurgicalPaths','Meta','surgeon_and_patient_case_meta.csv'),index_col=0) #CaseID
@@ -245,9 +245,9 @@ class VideoDataset(Dataset):
                             meta_df['Caseload'] = meta_df['Caseload'].fillna(-1)
                             meta_df['Caseload'] = meta_df['Caseload'].astype(int)
                             meta_df['Caseload Group'] = pd.cut(meta_df['Caseload'],[0,100,float('inf')],labels=['novice','expert'])
-                            meta_df['Prostate Volume Group'] = pd.qcut(meta_df['Prostate volume'],[0,0.5,1],labels=['â‰¤49','>49']) # nans stay as nans
-                            meta_df['Patient Age Group'] = pd.qcut(meta_df['Age'],[0,0.5,1],labels=['â‰¤66','>66'])
-                            meta_df['Patient BMI Group'] = pd.qcut(meta_df['BMI'],[0,0.5,1],labels=['â‰¤28','>28'])
+                            meta_df['Prostate Volume Group'] = pd.qcut(meta_df['Prostate volume'],[0,0.5,1],labels=['â‰?9','>49']) # nans stay as nans
+                            meta_df['Patient Age Group'] = pd.qcut(meta_df['Age'],[0,0.5,1],labels=['â‰?6','>66'])
+                            meta_df['Patient BMI Group'] = pd.qcut(meta_df['BMI'],[0,0.5,1],labels=['â‰?8','>28'])
                             meta_df['Preop Gleason'] = meta_df['Preop Gleason'].replace('-9','9') # correct input error
                             meta_df['Preop Gleason'] = meta_df['Preop Gleason'].replace('3',np.nan)
                             meta_df['Preop Gleason'] = meta_df['Preop Gleason'].replace('UTC',np.nan)
@@ -376,9 +376,9 @@ class VideoDataset(Dataset):
                         print(final_df['maj'].value_counts())
                         data = {phase:final_df}
                     else:
-                        hf_rgb = h5py.File(os.path.join(self.root_path,'VUA','Results','%s_RepsAndLabels.h5' % encoder_params),'r')
-                        #hf_rgb = h5py.File(os.path.join(self.root_path,'VUA','Results','ViT_SelfSupervised_ImageNet_RepsAndLabels.h5'),'r')
-                        hf_of = h5py.File(os.path.join(self.root_path,'VUA','Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
+                        hf_rgb = h5py.File(os.path.join(self.root_path,'Results','%s_RepsAndLabels.h5' % encoder_params),'r')
+                        #hf_rgb = h5py.File(os.path.join(self.root_path,'Results','ViT_SelfSupervised_ImageNet_RepsAndLabels.h5'),'r')
+                        hf_of = h5py.File(os.path.join(self.root_path,'Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
                         df = pd.read_csv(os.path.join(self.root_path,'SurgicalPaths','VUA_EASE_Stitch_Paths.csv'),index_col=0)
                         df = df[~df['File'].isin([102,372])] #problematic videos that need further inspection (fps discrepancy)
                         df['Video'] = df['Path'].apply(lambda path:path.split('\\')[-1])
@@ -457,9 +457,9 @@ class VideoDataset(Dataset):
                         return val
 
                     if phase == 'USC_inference': # perform inference on VUA videos as if no time-stamps were available
-                        #hf_rgb = h5py.File(os.path.join(self.root_path,'VUA','Results','%s_RepsAndLabels.h5' % encoder_params),'r')
-                        hf_rgb = h5py.File(os.path.join(self.root_path,'VUA','Results','ViT_SelfSupervised_ImageNet_RepsAndLabels.h5'),'r')
-                        hf_of = h5py.File(os.path.join(self.root_path,'VUA','Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
+                        #hf_rgb = h5py.File(os.path.join(self.root_path,'Results','%s_RepsAndLabels.h5' % encoder_params),'r')
+                        hf_rgb = h5py.File(os.path.join(self.root_path,'Results','ViT_SelfSupervised_ImageNet_RepsAndLabels.h5'),'r')
+                        hf_of = h5py.File(os.path.join(self.root_path,'Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
                         df = pd.read_csv(os.path.join(self.root_path,'SurgicalPaths','VUA_Paths.csv'),index_col=0)
                         to_exclude = (df['label'].str.contains('Log')) | (df['label'].str.contains('SESSION'))
                         subdf = df[~to_exclude] # these all have fps = 20 (makes life easier to work with)
@@ -511,9 +511,9 @@ class VideoDataset(Dataset):
                         self.label_encoder = label_encoder.fit(ease_domains)
                         data = {phase:df}
                     else:
-                        #hf_rgb = h5py.File(os.path.join(self.root_path,'VUA','Results','%s_RepsAndLabels.h5' % encoder_params),'r')
-                        hf_rgb = h5py.File(os.path.join(self.root_path,'VUA','Results','ViT_SelfSupervised_ImageNet_RepsAndLabels.h5'),'r')
-                        hf_of = h5py.File(os.path.join(self.root_path,'VUA','Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
+                        #hf_rgb = h5py.File(os.path.join(self.root_path,'Results','%s_RepsAndLabels.h5' % encoder_params),'r')
+                        hf_rgb = h5py.File(os.path.join(self.root_path,'Results','ViT_SelfSupervised_ImageNet_RepsAndLabels.h5'),'r')
+                        hf_of = h5py.File(os.path.join(self.root_path,'Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
                         df = pd.read_csv(os.path.join(self.root_path,'SurgicalPaths','VUA_EASE_Stitch_Paths.csv'),index_col=0)
                         df = df[~df['File'].isin([102,372])] #problematic videos that need further inspection (fps discrepancy)
                         df['Video'] = df['Path'].apply(lambda path:path.split('\\')[-1])
@@ -611,9 +611,9 @@ class VideoDataset(Dataset):
                         return pd.Series([startframe,endframe])
 
                     if phase == 'USC_inference': # perform inference on VUA videos as if no time-stamps were available
-                        #hf_rgb = h5py.File(os.path.join(self.root_path,'VUA','Results','%s_RepsAndLabels.h5' % encoder_params),'r')
-                        hf_rgb = h5py.File(os.path.join(self.root_path,'VUA','Results','ViT_SelfSupervised_ImageNet_RepsAndLabels.h5'),'r')
-                        hf_of = h5py.File(os.path.join(self.root_path,'VUA','Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
+                        #hf_rgb = h5py.File(os.path.join(self.root_path,'Results','%s_RepsAndLabels.h5' % encoder_params),'r')
+                        hf_rgb = h5py.File(os.path.join(self.root_path,'Results','ViT_SelfSupervised_ImageNet_RepsAndLabels.h5'),'r')
+                        hf_of = h5py.File(os.path.join(self.root_path,'Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
                         df = pd.read_csv(os.path.join(self.root_path,'SurgicalPaths','VUA_Paths.csv'),index_col=0)
                         to_exclude = (df['label'].str.contains('Log')) | (df['label'].str.contains('SESSION'))
                         subdf = df[~to_exclude] # these all have fps = 20 (makes life easier to work with)
@@ -665,9 +665,9 @@ class VideoDataset(Dataset):
                         self.label_encoder = label_encoder.fit(ease_domains)
                         data = {phase:df}
                     else:
-                        #hf_rgb = h5py.File(os.path.join(self.root_path,'VUA','Results','%s_RepsAndLabels.h5' % encoder_params),'r')
-                        hf_rgb = h5py.File(os.path.join(self.root_path,'VUA','Results','ViT_SelfSupervised_ImageNet_RepsAndLabels.h5'),'r')
-                        hf_of = h5py.File(os.path.join(self.root_path,'VUA','Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
+                        #hf_rgb = h5py.File(os.path.join(self.root_path,'Results','%s_RepsAndLabels.h5' % encoder_params),'r')
+                        hf_rgb = h5py.File(os.path.join(self.root_path,'Results','ViT_SelfSupervised_ImageNet_RepsAndLabels.h5'),'r')
+                        hf_of = h5py.File(os.path.join(self.root_path,'Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
                         df = pd.read_csv(os.path.join(self.root_path,'SurgicalPaths','VUA_EASE_Stitch_Paths.csv'),index_col=0)
                         df = df[~df['File'].isin([102,372])] #problematic videos that need further inspection (fps discrepancy)
                         df['Video'] = df['Path'].apply(lambda path:path.split('\\')[-1])
@@ -1350,8 +1350,8 @@ class VideoDataset(Dataset):
                         self.label_encoder = label_encoder.fit(train_df['Gesture'])
                         return train_df, val_df, test_df
 
-                    hf_rgb = h5py.File(os.path.join(self.root_path,'VUA','Results','%s_RepsAndLabels.h5' % encoder_params),'r')
-                    hf_of = h5py.File(os.path.join(self.root_path,'VUA','Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
+                    hf_rgb = h5py.File(os.path.join(self.root_path,'Results','%s_RepsAndLabels.h5' % encoder_params),'r')
+                    hf_of = h5py.File(os.path.join(self.root_path,'Results','ViT_SelfSupervised_ImageNet_FlowRepsAndLabels.h5'),'r')
 
                     df = pd.read_csv(os.path.join(self.root_path,'SurgicalPaths','VUA_gestures_timestamps.csv'),index_col=0)
                     df['Video'] = df['Path'].apply(lambda path:path.split('\\')[-1])              

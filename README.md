@@ -19,9 +19,15 @@ Then create a conda env and install the dependencies:
 ```shell
 conda create -n SAIS python=3.9.7 -y
 conda activate SAIS
-pip install -r requirements.txt
-pip install -e .
+pip install numpy==1.24.3 h5py==3.8.0 tqdm==4.65.0 Pillow==9.5.0 opencv-python==4.7.0.72 pandas==1.5.3 einops timm
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 ```
+这个版本的代码应该能在CUDA 12.4环境下正常工作，因为：
+
+使用了OpenCV的原生光流算法，不依赖额外的深度学习模型
+保持了DINO特征提取的功能
+光流特征维度从6维扩展到10维（2维均值 + 2维标准差 + 2维最大值 + 4维方向直方图）
+使用了较新的PyTorch版本，与CUDA 12.x系列兼容性较好
 
 ## Running inference
 Please follow the steps below to perform inference with SAIS on a new surgical video.
